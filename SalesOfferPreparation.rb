@@ -5,7 +5,7 @@ include REXML
 
 test_start_time = Time.now
 
-# ToDo: wyciaganie parametrow testu z pliku konfiguracji testu
+# ToDo: wyciaganie parametrow testu z pliku konfiguracji testu << Done
 test_params = get_test_data('../TestDataBase/SOU.SalesOfferPreparation/DaneTestowe.xlsx')
 test_params.each_with_index do |test_param, index|
   log "[TEST]: Starting Test[#{index}] of SalesOfferPreparation endpoint"
