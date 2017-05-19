@@ -19,25 +19,24 @@ def count_lines(log_file_path)
   start = Time.now
   log "Counting log file: '#{log_file_path}' lines!"
   lines_count = 0
+  log_file = nil
   Net::SFTP.start(SOU_NODE_1[:host], SOU_NODE_1[:username], :password => SOU_NODE_1[:password]) do |sftp|
-    sftp.file.open(log_file_path, "r") do |file|
-      while line = file.gets
-        lines_count += 1
-      end
-    end
+    log_file = sftp.download!(LOG_FILE_PATH)
+    lines_count = log_file.split("\n").count
   end
   log "Counting lines(#{lines_count}) execution Time: '#{Time.now - start}'"
-  lines_count
+  return lines_count, log_file
 end
-def read_lines(log_file_path, lines_to_show)
-  Net::SFTP.start(SOU_NODE_1[:host], SOU_NODE_1[:username], :password => SOU_NODE_1[:password]) do |sftp|
-    sftp.download!(log_file_path, "log.txt")
-  end
-  lines = File.open('log.txt').to_a
+def read_lines(log_file_path, lines_to_show, log_file_string, msg = 'Success')
+  lines = log_file_string.split("\n")
   lines.last(lines_to_show).each do |line|
     line = line.gsub(/(^20.+Log - )/, '').gsub('&amp;', '&').gsub('&lt;', '<')
-    doc = Document.new(line)
-    doc.write(targetstr = "", 2) #indents with 2 spaces
-    log "[LOG]: #{targetstr.gsub("\n", "\n[LOG]: ")}"
+    if msg == 'Success'
+      doc = Document.new(line)
+      doc.write(targetstr = "", 2) #indents with 2 spaces
+      log "[LOG]: #{targetstr.gsub("\n", "\n[LOG]: ")}"
+    else
+      log "[LOG]: #{line}"
+    end
   end
 end
